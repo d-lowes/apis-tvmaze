@@ -3,8 +3,9 @@
 const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
-const BASE_URL = "http://api.tvmaze.com/search/shows";
-const DOGE = "https://www.cnet.com/a/img/resize/61c44c6765cb6b8529df884935ad7aefc622aeec/hub/2021/11/03/3c2a7d79-770e-4cfa-9847-66b3901fb5d7/c09.jpg"
+const BASE_URL = "http://api.tvmaze.com";
+
+const DOGE_IMG = "https://thedrum-media.imgix.net/thedrum-prod/s3/news/tmp/637022/shiba1.png?w=608&ar=default&fit=crop&crop=faces,edges&auto=format&dpr=1"
 
 /** Given a search term, search for tv shows that match that query.
  *
@@ -14,42 +15,25 @@ const DOGE = "https://www.cnet.com/a/img/resize/61c44c6765cb6b8529df884935ad7aef
  */
 
 async function getShowsByTerm(searchTerm) {
-  // ADD: Remove placeholder & make request to TVMaze search shows API.
-  let showAdded = [];
-  console.log(searchTerm);
-  let gotShow = await axios.get(BASE_URL, {
-                                      params: {
-                                                q: searchTerm
-                                              }
-  })
+  let tvSeriesRequest = await axios.get(`${BASE_URL}/search/shows`, {
+    params: {
+      q: searchTerm
+    }
+  });
 
-  // console.log(gotShow.data);
-  for (let i = 0; i < gotShow.data.length; i++) {
-    let showResult ={};
-    let showData = gotshow.data[i].show;
-    if (showData)
-    showResult.id = showData.id;
-    showResult.name = showData.name;
-    showResult.summary = showData.summary;
-    showResult.image = showData.image.medium || DOGE;
+  return tvSeriesRequest.data.map(showSearchResults => {
+    const showImg = showSearchResults.show.image
+                    ? showSearchResults.show.image.medium
+                    : DOGE_IMG;
 
-
-    // console.log(gotShow.data[i]);
-    showAdded.push(showResult);
-  }
-
-  // return gotShow.data.map(showSearchResults => {
-  //               id:showSearchResults.show.id,
-  //               name:showSearchResults.show.name,
-  //               summary:showSearchResults.show.summary,
-  //               image:showSearchResults.show.image.original || DOGE
-  //         });
-
-
-  return showAdded
-
+    return {
+      id: showSearchResults.show.id,
+      name: showSearchResults.show.name,
+      summary: showSearchResults.show.summary,
+      image: showImg
+    }
+  });
 }
-
 
 /** Given list of shows, create markup for each and append to DOM.
  *
@@ -105,10 +89,22 @@ $searchForm.on("submit", async function handleSearchForm (evt) {
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
+async function getEpisodesOfShow(id) {
+  const episodeData = await axios.get(
+    `${BASE_URL}/shows/${id}/episodes.`
+  );
+  return episodeData.data.map(episode => {
+    return {
+      id: episode.id,
+      name: episode.name,
+      season: episode.season,
+      number: episode.number
+    }
+  });
+}
 
-/** Write a clear docstring for this function... */
+/** Accept an array of episodes ; append the episode info to the DOM */
 
-// function displayEpisodes(episodes) { }
+function displayEpisodes(episodes) { }
 
 // add other functions that will be useful / match our structure & design
