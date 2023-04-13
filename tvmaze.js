@@ -92,12 +92,10 @@ async function getEpisodesOfShow(id) {
   );
 
   return episodeData.data.map(episode => {
-    return {
-      id: episode.id,
-      name: episode.name,
-      season: episode.season,
-      number: episode.number
-    }
+    //TODO: destructure episode object (id, name, season, number)
+    let {id, name, season, number} = episode;
+
+    return {id, name, season, number};
   });
 
 }
@@ -106,10 +104,12 @@ async function getEpisodesOfShow(id) {
  *  the DOM display
  */
 function displayEpisodes(episodes) {
+  //TODO: '$' before name for jquery items, place all variables at the top
   const episodeList = $("#episodesList");
 
   episodeList.empty();
   $("#episodesArea").css("display", "block");
+  //TODO: .show(), consider showing all AFTER appending all
 
   for (let ep of episodes) {
     let newEpisode = $("<li>");
@@ -132,10 +132,12 @@ async function getEpisodesAndDisplay(id) {
 function handleClickEpisodes(evt) {
   //extract evt ancestor data.id point
   let ancestorEpId = $(evt.target).closest(".Show").attr("data-show-id");
+  //TODO: .attr("data-show-id") ~ .data("show-id")
 
   // console.log('ancestor id = ', ancestorEpId);
+  //TODO: when you call async function you should await, fine rn because func not returning anything
   getEpisodesAndDisplay(ancestorEpId);
 
 }
 
-$("#showsList").on("click", "button", handleClickEpisodes);
+$("#showsList").on("click", ".Show-getEpisodes", handleClickEpisodes);
